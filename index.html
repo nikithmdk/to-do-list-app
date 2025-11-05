@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>To Do List</title>
+<style>
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.4;
+  margin: 0;
+  min-width: 250px;
+  transition: background 0.3s, color 0.3s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul li {
+  cursor: pointer;
+  position: relative;
+  padding: 12px 8px 12px 40px;
+  list-style-type: none;
+  background: #eee;
+  font-size: 18px;
+  transition: background 0.3s, color 0.3s;
+  user-select: none;
+}
+
+ul li:nth-child(odd) {
+  background: #f9f9f9;
+}
+
+ul li:hover {
+  background: #ddd;
+}
+
+ul li.checked {
+  background: #888;
+  color: #fff;
+  text-decoration: line-through;
+}
+
+ul li.checked::before {
+  content: '';
+  position: absolute;
+  border-color: #fff;
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  top: 10px;
+  left: 16px;
+  transform: rotate(45deg);
+  height: 15px;
+  width: 7px;
+}
+
+.close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+
+.close:hover {
+  background-color: rgb(44, 124, 151);
+  color: white;
+}
+
+/* ----- HEADER ----- */
+.header {
+  background-color: rgb(44, 124, 151);
+  padding: 20px 40px;
+  color: white;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  text-align: center;
+}
+
+.header h2 {
+  margin: 0 0 15px 0;
+  font-size: 28px;
+}
+
+/* Row με input και κουμπιά */
+.header .input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header input {
+  flex: 1 1 250px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+}
+
+.header .addBtn,
+.header #themeToggle {
+  flex: 0 0 auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* ----- DARK MODE ----- */
+body.dark-mode {
+  background-color: #1f1f1f;
+  color: white;
+}
+
+body.dark-mode ul li {
+  background: #333;
+  color: white;
+}
+
+body.dark-mode ul li:nth-child(odd) {
+  background: #2a2a2a;
+}
+
+body.dark-mode .header {
+  background-color: #222;
+}
+
+body.dark-mode .addBtn,
+body.dark-mode #themeToggle {
+  background-color: #555;
+  color: white;
+}
+
+body.dark-mode .close:hover {
+  background-color: #555;
+  color: white;
+}
+
+/* ----- RESPONSIVE ----- */
+@media screen and (max-width: 800px) {
+  .header .input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header input,
+  .header .addBtn,
+  .header #themeToggle {
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h2><b>To Do List</b></h2>
+  <div class="input-row">
+    <input type="text" id="myInput" placeholder="Title...">
+    <span onclick="newElement()" class="addBtn">Add</span>
+    <button id="themeToggle">🌙</button>
+  </div>
+</div>
+
+<ul id="myUL"></ul>
+
+<script>
+// Στοιχεία DOM
+const myUL = document.getElementById("myUL");
+const myInput = document.getElementById("myInput");
+const themeToggle = document.getElementById("themeToggle");
+
+let todoList = [];
+
+// ----------------- ΑΠΟΘΗΚΕΥΣΗ / ΦΟΡΤΩΣΗ -----------------
+function saveList() {
+  localStorage.setItem("todoList", JSON.stringify(todoList));
+}
+
+function loadList() {
+  const stored = localStorage.getItem("todoList");
+  if (stored) {
+    todoList = JSON.parse(stored);
+  } else {
+    // Προεπιλεγμένα αντικείμενα
+    todoList = [
+      { text: "Μαθηματικά - Κεφάλαιο 1", checked: false },
+      { text: "Μαθηματικά - Κεφάλαιο 2", checked: false },
+      { text: "Μαθηματικά - Κεφάλαιο 3", checked: false },
+      { text: "Έκθεση - Λογοτεχνία", checked: false },
+    ];
+  }
+  renderList();
+}
+
+// ----------------- ΕΜΦΑΝΙΣΗ -----------------
+function renderList() {
+  myUL.innerHTML = "";
+
+  todoList.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.textContent = item.text;
+    if (item.checked) li.classList.add("checked");
+
+    // κουμπί διαγραφής
+    const span = document.createElement("SPAN");
+    span.className = "close";
+    span.textContent = "\u00D7";
+    span.onclick = () => {
+      todoList.splice(index, 1);
+      saveList();
+      renderList();
+    };
+
+    li.onclick = (ev) => {
+      if (ev.target.tagName === "LI") {
+        li.classList.toggle("checked");
+        todoList[index].checked = li.classList.contains("checked");
+        saveList();
+      }
+    };
+
+    li.appendChild(span);
+    myUL.appendChild(li);
+  });
+}
+
+// ----------------- ΠΡΟΣΘΗΚΗ ΝΕΟΥ -----------------
+function newElement() {
+  const inputValue = myInput.value.trim();
+  if (!inputValue) {
+    alert("You must write something!");
+    return;
+  }
+
+  todoList.push({ text: inputValue, checked: false });
+  myInput.value = "";
+  saveList();
+  renderList();
+}
+
+// Προσθήκη με Enter
+myInput.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    newElement();
+  }
+});
+
+// ----------------- DARK MODE -----------------
+function loadTheme() {
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+    themeToggle.textContent = "☀️";
+  }
+}
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  themeToggle.textContent = isDark ? "☀️" : "🌙";
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+});
+
+
+loadList();
+loadTheme();
+</script>
+
+</body>
+</html>
