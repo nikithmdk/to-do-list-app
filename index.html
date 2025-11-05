@@ -101,12 +101,22 @@ ul li.checked::before {
   gap: 10px;
 }
 
+
 .header input {
-  flex: 1 1 250px;
   padding: 10px;
   font-size: 16px;
-  border-radius: 5px;
-  border: none;
+  height: auto;           /* αφήνουμε το ύψος να προσαρμοστεί */
+  max-height: 50px;       /* όριο στο ύψος */
+  box-sizing: border-box; /* ώστε padding να συμπεριλαμβάνεται */
+}
+
+/* Προσαρμογή για μικρότερες οθόνες (κινητά) */
+@media screen and (max-width: 600px) {
+  .header input {
+    padding: 8px;
+    font-size: 14px;
+    max-height: 45px;
+  }
 }
 
 .header .addBtn,
@@ -280,3 +290,4 @@ loadTheme();
 
 </body>
 </html>
+
